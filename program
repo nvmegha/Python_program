@@ -1,0 +1,88 @@
+# Product catalog
+products = {
+    "Product A": 20,
+    "Product B": 40,
+    "Product C": 50
+}
+
+# Discount rules
+discount_rules = {
+    "flat_10_discount": (200, 10),
+    "bulk_5_discount": (10, 0.05),
+    "bulk_10_discount": (20, 0.1),
+    "tiered_50_discount": (30, 15, 0.5)
+}
+
+# Fees
+gift_wrap_fee = 1
+shipping_fee_per_package = 5
+units_per_package = 10
+
+# Function to calculate the total amount for a product
+def calculate_product_total(quantity, price, apply_discount=False):
+    total = quantity * price
+
+    # Apply discount if applicable
+    if apply_discount:
+        total -= (total * discount_rules["bulk_5_discount"][1])
+
+    return total
+
+# Function to calculate the discount based on the cart total
+def calculate_discount(cart_total):
+    for rule, values in discount_rules.items():
+        if cart_total >= values[0]:
+            return rule, values[1]
+    
+    return "No discount", 0
+
+# Input quantities and gift wrap information for each product
+product_quantities = {}
+product_gift_wraps = {}
+
+for product in products:
+    quantity = int(input(f"Enter the quantity for {product}: "))
+    gift_wrap = input(f"Do you want to gift wrap {product}? (yes/no): ").lower()
+
+    product_quantities[product] = quantity
+    product_gift_wraps[product] = True if gift_wrap == "yes" else False
+
+# Calculate product details
+product_details = {}
+
+for product, quantity in product_quantities.items():
+    price = products[product]
+    total_amount = calculate_product_total(quantity, price, product_gift_wraps[product])
+
+    product_details[product] = {
+        "Quantity": quantity,
+        "Total Amount": total_amount
+    }
+
+# Calculate subtotal
+subtotal = sum(details["Total Amount"] for details in product_details.values())
+
+# Calculate discount
+discount_name, discount_amount = calculate_discount(subtotal)
+
+# Calculate shipping fee
+shipping_fee = (subtotal // units_per_package) * shipping_fee_per_package
+
+# Calculate gift wrap fee
+gift_wrap_total = sum(product_quantities[product] for product, gift_wrap in product_gift_wraps.items() if gift_wrap)
+gift_wrap_fee_total = gift_wrap_total * gift_wrap_fee
+
+# Calculate total
+total = subtotal - discount_amount + shipping_fee + gift_wrap_fee_total
+
+# Output the details
+print("\nProduct Details:")
+for product, details in product_details.items():
+    print(f"{product}: {details['Quantity']} units, Total Amount: ${details['Total Amount']}")
+
+print(f"\nSubtotal: ${subtotal}")
+print(f"Discount Applied: {discount_name}")
+print(f"Discount Amount: ${discount_amount}")
+print(f"Shipping Fee: ${shipping_fee}")
+print(f"Gift Wrap Fee: ${gift_wrap_fee_total}")
+print(f"Total: ${total}")
